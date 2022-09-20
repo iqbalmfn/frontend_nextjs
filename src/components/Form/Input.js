@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React from 'react'
 
 function Input({ children }) {
@@ -12,13 +13,12 @@ function Label({ children }) {
   return <label htmlFor={children} className="capitalize">{children}</label>
 }
 
-function Form({ type, ...props }) {
+function Form({ className, ...props }) {
   return (
     <div className="relative">
       <input
         {...props}
-        type={type}
-        className="w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm"
+        className={ clsx(className, "w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm")}
       />
     </div>
   )
