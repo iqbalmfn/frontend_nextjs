@@ -11,6 +11,7 @@ function useBook() {
   const [error, setError] = useState(null)
   const [submit, setSubmit] = useState(false)
   const [categories, setCategories] = useState([])
+  const [image, setImage] = useState(null)
 
   async function getCategories() {
     const response = await axios.get(`${baseUrl}/api/categories`)
@@ -35,8 +36,8 @@ function useBook() {
     fetchBook()
   }, [])
 
-   // handle form
-   const formik = useFormik({
+  // handle form
+  const formik = useFormik({
     initialValues: {
       category_id: '',
       name: '',
@@ -55,7 +56,7 @@ function useBook() {
           })
         } else {
           handleAddBook(values)
-          resetForm()
+          // resetForm()
           stateSubmit(false)
           swal('Data berhasil ditambahkan', {
             icon: 'success',
@@ -114,9 +115,25 @@ function useBook() {
   }
 
   async function handleAddBook(values) {
-    const response = await axios.post(`${baseUrl}/api/books`, values)
+    const formData = new FormData()
+    Object.keys(values).forEach(key => {
+      formData.append(key, values[key])
+    })
+
+    if (image) {
+      formData.append('image', image)
+    }
+
+    const response = await axios.post(
+      `${baseUrl}/api/books`, 
+      formData, 
+      {
+        headers: { "Content-Type": `multipart/form-data; charset=utf-8; boundary=${Math.random().toString().substr(2)}` }
+      }
+    )
     const book = response.data.data
     setBooks(prev => [book, ...prev])
+    setImage(null)
   }
 
   function stateSubmit(value) {
@@ -133,6 +150,8 @@ function useBook() {
     handleDeleteBook,
     getBook,
     stateSubmit,
+    image,
+    setImage
   }
 }
 

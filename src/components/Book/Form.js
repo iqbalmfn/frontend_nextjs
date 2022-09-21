@@ -3,14 +3,15 @@ import Button from '../Button/Index'
 import Input from '../Form/Input'
 import useBook from './BookHook'
 
-export default function Form({ formik, submit, stateSubmit }) {
+export default function Form({ formik, submit, stateSubmit, image, setImage }) {
   const { categories } = useBook()
 
   return (
     <div className="px-4 py-16 mx-auto max-w-screen-xl sm:px-6 lg:px-8">
       <form
         onSubmit={formik.handleSubmit}
-        className="max-w-md mx-auto mt-8 mb-0 space-y-5">
+        className="max-w-md mx-auto mt-8 mb-0 space-y-5" 
+        >
         <Input>
           <Input.label>category</Input.label>
           <Input.select
@@ -20,6 +21,9 @@ export default function Form({ formik, submit, stateSubmit }) {
             className={clsx(
               formik.errors['category_id'] && submit ? 'border-red-500' : '',
             )}>
+              <Input.option value="">
+                Select Category
+              </Input.option>
             {categories.map(category => (
               <Input.option key={category.id} value={category.id}>
                 {category.name}
@@ -27,7 +31,7 @@ export default function Form({ formik, submit, stateSubmit }) {
             ))}
           </Input.select>
           {formik.errors && submit ? (
-            <small className="text-red-500">{formik.errors['catery_id']}</small>
+            <small className="text-red-500">{formik.errors['category_id']}</small>
           ) : (
             ''
           )}
@@ -86,6 +90,21 @@ export default function Form({ formik, submit, stateSubmit }) {
           {formik.errors && submit ? (
             <small className="text-red-500">
               {formik.errors['description']}
+            </small>
+          ) : (
+            ''
+          )}
+        </Input>
+
+        <Input>
+          <Input.label>Image</Input.label>
+          <Input.file 
+            accept="image/*" 
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+          {formik.errors && submit ? (
+            <small className="text-red-500">
+              {formik.errors['image']}
             </small>
           ) : (
             ''

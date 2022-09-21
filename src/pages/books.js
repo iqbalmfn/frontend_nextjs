@@ -14,6 +14,8 @@ export default function Book() {
     handleDeleteBook,
     getBook,
     stateSubmit,
+    image,
+    setImage
   } = useBook()
 
   return (
@@ -34,6 +36,8 @@ export default function Book() {
               formik={formik}
               submit={bookSubmit}
               stateSubmit={stateSubmit}
+              image={image}
+              setImage={setImage}
             />
             <div className="p-6 bg-white border-b border-gray-200 grid lg:grid-cols-3 md:grid-cols-2 gap-4">
               {bookError && <div>{bookError}</div>}

@@ -32,20 +32,30 @@ function Select({ className, children, ...props }) {
       {...props}
       className={clsx(
         className,
-        ' border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4 pr-12 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500',
+        ' border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4 pr-12',
       )}>
       {children}
     </select>
   )
 }
 
-function selectOption({children, ...props}) {
-    return <option {...props}>{children}</option>
+function File({ className, ...props }) {
+  return (
+    <input 
+      {...props} 
+      className={clsx(className, "block p-4 pr-12 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer")} 
+      type="file" />
+  )
+}
+
+function selectOption({ children, ...props }) {
+  return <option {...props}>{children}</option>
 }
 
 Input.label = Label
 Input.form = Form
 Input.select = Select
 Input.option = selectOption
+Input.file = File
 
 export default Input
