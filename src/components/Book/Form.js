@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { useRef, useState } from 'react'
 import Button from '../Button/Index'
 import Input from '../Form/Input'
 import useBook from './BookHook'

@@ -7,8 +7,15 @@ import { bookSchema } from '@/components/Book/BookSchema'
 import swal from 'sweetalert'
 
 function useBook() {
+  const [perPage, setPerPage] = useState(10)
+  const [urlPage, setUrlPage] = useState(`${baseUrl}/api/books?page=1`)
+  const [searchBook, setSearchBook] = useState('')
+  const [categoryBook, setCategoryBook] = useState('')
   const [books, setBooks] = useState([])
+  const [booksMeta, setBooksMeta] = useState([])
+  const [refresh, setRefresh] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [firstLoading, setFirstLoading] = useState(false)
   const [error, setError] = useState(null)
   const [submit, setSubmit] = useState(false)
   const [categories, setCategories] = useState([])
@@ -16,6 +23,7 @@ function useBook() {
   const [message, setMessage] = useState({
     image: null
   })
+
 
   async function getCategories() {
     const response = await axios.get(`${baseUrl}/api/categories`)
@@ -26,8 +34,16 @@ function useBook() {
   async function fetchBook() {
     try {
       setLoading(true)
-      const response = await axios.get(`${baseUrl}/api/books`)
-      setBooks(response.data.data)
+      const response = await axios.get(urlPage, {
+        params: {
+          perPage: perPage,
+          search: searchBook,
+          category: categoryBook,
+        }
+      })
+      setBooks(response.data.data.data)
+      setBooksMeta(response.data.data)
+      setRefresh(false)
     } catch (error) {
       setError(error.message)
     } finally {
@@ -35,11 +51,15 @@ function useBook() {
     }
   }
 
+  function refreshTable() {
+    setRefresh(true)
+    setUrlPage('http://localhost:8000/api/books?page=1')
+  }
+
   useEffect(() => {
     getCategories()
     fetchBook()
-  }, [])
-
+  }, [urlPage, perPage, searchBook, refresh, categoryBook])
   // handle form
   const formik = useFormik({
     initialValues: {
@@ -145,12 +165,12 @@ function useBook() {
       toast.success('sukses bro', {
         theme: 'colored',
       })
-      setMessage({image: ''})
+      setMessage({ image: '' })
     } catch (error) {
       toast.error(error.response.data.data.image[0], {
         theme: 'colored',
       })
-      setMessage({image: error.response.data.data.image[0]})
+      setMessage({ image: error.response.data.data.image[0] })
     }
   }
 
@@ -161,8 +181,16 @@ function useBook() {
   return {
     categories,
     books,
+    booksMeta,
+    searchBook,
+    setSearchBook,
+    urlPage,
+    setUrlPage,
+    perPage,
+    setPerPage,
     formik,
     bookLoading: loading,
+    firstLoading,
     bookError: error,
     bookSubmit: submit,
     handleDeleteBook,
@@ -171,6 +199,9 @@ function useBook() {
     image,
     setImage,
     message,
+    refreshTable,
+    categoryBook,
+    setCategoryBook
   }
 }
 
