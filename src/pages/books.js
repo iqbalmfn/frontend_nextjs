@@ -1,3 +1,4 @@
+import { ToastContainer } from 'react-toastify';
 import useBook from '@/components/Book/BookHook'
 import BookForm from '@/components/Book/Form'
 import BookList from '@/components/Book/List'
@@ -15,7 +16,8 @@ export default function Book() {
     getBook,
     stateSubmit,
     image,
-    setImage
+    setImage,
+    message
   } = useBook()
 
   return (
@@ -38,6 +40,7 @@ export default function Book() {
               stateSubmit={stateSubmit}
               image={image}
               setImage={setImage}
+              message={message}
             />
             <div className="p-6 bg-white border-b border-gray-200 grid lg:grid-cols-3 md:grid-cols-2 gap-4">
               {bookError && <div>{bookError}</div>}
@@ -58,6 +61,7 @@ export default function Book() {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </AppLayout>
   )
 }

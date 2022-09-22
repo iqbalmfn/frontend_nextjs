@@ -1,4 +1,5 @@
 import axios from '@/lib/axios'
+import { toast } from 'react-toastify'
 import { useEffect, useState } from 'react'
 import baseUrl from '@/lib/baseUrl'
 import { useFormik } from 'formik'
@@ -12,6 +13,9 @@ function useBook() {
   const [submit, setSubmit] = useState(false)
   const [categories, setCategories] = useState([])
   const [image, setImage] = useState(null)
+  const [message, setMessage] = useState({
+    image: null
+  })
 
   async function getCategories() {
     const response = await axios.get(`${baseUrl}/api/categories`)
@@ -45,22 +49,12 @@ function useBook() {
       price: 0,
     },
     validationSchema: bookSchema,
-    onSubmit: async (values, { resetForm }) => {
+    onSubmit: async (values) => {
       try {
         if (values.id) {
           handleUpdateBooks(values)
-          resetForm()
-          stateSubmit(false)
-          swal('Data berhasil diupdate', {
-            icon: 'success',
-          })
         } else {
           handleAddBook(values)
-          // resetForm()
-          stateSubmit(false)
-          swal('Data berhasil ditambahkan', {
-            icon: 'success',
-          })
         }
       } catch (error) {
         console.log(error)
@@ -70,13 +64,24 @@ function useBook() {
 
   // handle update
   async function handleUpdateBooks(values) {
-    const response = await axios.put(
-      `${baseUrl}/api/books/${values.id}`,
-      values,
-    )
-    const book = response.data.data
-    const updatedBook = books.map(item => (item.id === book.id ? book : item))
-    setBooks(updatedBook)
+    try {
+      const response = await axios.put(
+        `${baseUrl}/api/books/${values.id}`,
+        values,
+      )
+      const book = response.data.data
+      const updatedBook = books.map(item => (item.id === book.id ? book : item))
+      formik.resetForm();
+      setBooks(updatedBook)
+      stateSubmit(false)
+      toast.success('sukses bro', {
+        theme: 'colored',
+      })
+    } catch (error) {
+      toast.error('error bro', {
+        theme: 'colored',
+      })
+    }
   }
 
   //handle delete
@@ -115,25 +120,38 @@ function useBook() {
   }
 
   async function handleAddBook(values) {
-    const formData = new FormData()
-    Object.keys(values).forEach(key => {
-      formData.append(key, values[key])
-    })
+    try {
+      const formData = new FormData()
+      Object.keys(values).forEach(key => {
+        formData.append(key, values[key])
+      })
 
-    if (image) {
-      formData.append('image', image)
-    }
-
-    const response = await axios.post(
-      `${baseUrl}/api/books`, 
-      formData, 
-      {
-        headers: { "Content-Type": `multipart/form-data; charset=utf-8; boundary=${Math.random().toString().substr(2)}` }
+      if (image) {
+        formData.append('image', image)
       }
-    )
-    const book = response.data.data
-    setBooks(prev => [book, ...prev])
-    setImage(null)
+
+      const response = await axios.post(`${baseUrl}/api/books`, formData, {
+        headers: {
+          'Content-Type': `multipart/form-data; charset=utf-8; boundary=${Math.random()
+            .toString()
+            .substr(2)}`,
+        },
+      })
+      const book = response.data.data
+      setBooks(prev => [book, ...prev])
+      formik.resetForm();
+      setImage(null)
+      stateSubmit(false)
+      toast.success('sukses bro', {
+        theme: 'colored',
+      })
+      setMessage({image: ''})
+    } catch (error) {
+      toast.error(error.response.data.data.image[0], {
+        theme: 'colored',
+      })
+      setMessage({image: error.response.data.data.image[0]})
+    }
   }
 
   function stateSubmit(value) {
@@ -151,7 +169,8 @@ function useBook() {
     getBook,
     stateSubmit,
     image,
-    setImage
+    setImage,
+    message,
   }
 }
 
