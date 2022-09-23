@@ -5,11 +5,8 @@ import baseUrl from '@/lib/baseUrl'
 import { useFormik } from 'formik'
 import { bookSchema } from '@/components/Book/BookSchema'
 import swal from 'sweetalert'
-import { useQuery } from 'react-query'
 
-function useBook() {
-    const [body, setBody] = useState(null)
-  const [page, setPage] = useState(1)
+function useBook3() {
   const [perPage, setPerPage] = useState(10)
   const [urlPage, setUrlPage] = useState(`${baseUrl}/api/books?page=1`)
   const [searchBook, setSearchBook] = useState('')
@@ -23,33 +20,9 @@ function useBook() {
   const [categories, setCategories] = useState([])
   const [image, setImage] = useState(null)
   const [message, setMessage] = useState({
-    image: null,
+    image: null
   })
 
-  // query string fetch
-
-  async function getBooks(urlPage, perPage, searchBook, categoryBook) {
-    try {
-      const response = await axios.get(urlPage, {
-        params: {
-          perPage: perPage,
-          search: searchBook,
-          category: categoryBook,
-        },
-      })
-      return response.data
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  const { data, isError, isLoading, isFetching, isSuccess } = useQuery(
-    ['books', urlPage, perPage, searchBook, categoryBook, books],
-    () => getBooks(urlPage, perPage, searchBook, categoryBook),
-    // {
-    //     staleTime: 3000,
-    //     refetchInterval: 3000
-    // }
-  )
 
   async function getCategories() {
     const response = await axios.get(`${baseUrl}/api/categories`)
@@ -65,7 +38,7 @@ function useBook() {
           perPage: perPage,
           search: searchBook,
           category: categoryBook,
-        },
+        }
       })
       setBooks(response.data.data.data)
       setBooksMeta(response.data.data)
@@ -84,7 +57,7 @@ function useBook() {
 
   useEffect(() => {
     getCategories()
-    // fetchBook()
+    fetchBook()
   }, [urlPage, perPage, searchBook, refresh, categoryBook])
   // handle form
   const formik = useFormik({
@@ -95,7 +68,7 @@ function useBook() {
       price: 0,
     },
     validationSchema: bookSchema,
-    onSubmit: async values => {
+    onSubmit: async (values) => {
       try {
         if (values.id) {
           handleUpdateBooks(values)
@@ -117,7 +90,7 @@ function useBook() {
       )
       const book = response.data.data
       const updatedBook = books.map(item => (item.id === book.id ? book : item))
-      formik.resetForm()
+      formik.resetForm();
       setBooks(updatedBook)
       stateSubmit(false)
       toast.success('sukses bro', {
@@ -185,7 +158,7 @@ function useBook() {
       })
       const book = response.data.data
       setBooks(prev => [book, ...prev])
-      formik.resetForm()
+      formik.resetForm();
       setImage(null)
       stateSubmit(false)
       toast.success('sukses bro', {
@@ -205,12 +178,6 @@ function useBook() {
   }
 
   return {
-    data,
-    page,
-    setPage,
-    isLoading,
-    isFetching,
-    isSuccess,
     categories,
     books,
     booksMeta,
@@ -232,8 +199,8 @@ function useBook() {
     message,
     refreshTable,
     categoryBook,
-    setCategoryBook,
+    setCategoryBook
   }
 }
 
-export default useBook
+export default useBook3

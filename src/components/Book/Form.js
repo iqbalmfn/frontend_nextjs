@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import Button from '../Button/Index'
 import Input from '../Form/Input'
-import useBook from './BookHook'
+import useBook from './BookHook3'
 
 export default function Form({
   formik,
@@ -10,6 +10,7 @@ export default function Form({
   image,
   setImage,
   message,
+  onSubmit
 }) {
   const { categories } = useBook()
 
@@ -25,7 +26,7 @@ export default function Form({
             value={formik.values.category_id}
             onChange={formik.handleChange}
             className={clsx(
-              formik.errors['category_id'] && submit ? 'border-red-500' : '',
+              formik.errors['category_id']? 'border-red-500' : '',
             )}>
             <Input.option value="">Select Category</Input.option>
             {categories.map(category => (
@@ -34,7 +35,7 @@ export default function Form({
               </Input.option>
             ))}
           </Input.select>
-          {formik.errors && submit ? (
+          {formik.errors? (
             <small className="text-red-500">
               {formik.errors['category_id']}
             </small>
@@ -52,10 +53,10 @@ export default function Form({
             value={formik.values.name}
             onChange={formik.handleChange}
             className={clsx(
-              formik.errors['name'] && submit ? 'border-red-500' : '',
+              formik.errors['name']? 'border-red-500' : '',
             )}
           />
-          {formik.errors && submit ? (
+          {formik.errors? (
             <small className="text-red-500">{formik.errors['name']}</small>
           ) : (
             ''
@@ -71,10 +72,10 @@ export default function Form({
             value={formik.values.price}
             onChange={formik.handleChange}
             className={clsx(
-              formik.errors['price'] && submit ? 'border-red-500' : '',
+              formik.errors['price']? 'border-red-500' : '',
             )}
           />
-          {formik.errors && submit ? (
+          {formik.errors? (
             <small className="text-red-500">{formik.errors['price']}</small>
           ) : (
             ''
@@ -90,10 +91,10 @@ export default function Form({
             value={formik.values.description}
             onChange={formik.handleChange}
             className={clsx(
-              formik.errors['description'] && submit ? 'border-red-500' : '',
+              formik.errors['description']? 'border-red-500' : '',
             )}
           />
-          {formik.errors && submit ? (
+          {formik.errors? (
             <small className="text-red-500">
               {formik.errors['description']}
             </small>
@@ -118,7 +119,10 @@ export default function Form({
           <Button
             type="submit"
             className="bg-blue-500 text-white"
-            onClick={stateSubmit}>
+            onClick={() => {
+              stateSubmit(),
+              onSubmit(formik.value)
+            }}>
             {formik.values.id ? 'Update' : 'Submit'}
           </Button>
         </div>

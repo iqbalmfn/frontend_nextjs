@@ -1,24 +1,17 @@
-import useBook from '@/components/Book/BookHook';
+import useBook from '@/components/Book/BookHook3';
 import BookForm from '@/components/Book/Form';
-import BookTable from '@/components/Book/Table';
+import BookTable from '@/components/Book/Table3';
 import AppLayout from '@/components/Layouts/AppLayout';
 import Head from 'next/head';
 import { ToastContainer } from 'react-toastify';
 
-export default function Book() {
+export default function Book3() {
   const {
     formik,
-    page,
-    setPage,
-    data,
-    isLoading,
-    isFetching,
-    isSuccess,
     books,
     booksMeta,
     searchBook,
     setSearchBook,
-    urlPage,
     setUrlPage,
     perPage,
     setPerPage,
@@ -59,19 +52,12 @@ export default function Book() {
             />
             <div className="p-6 bg-white">
               <BookTable
-                page={page}
-                setPage={setPage}
-                data={data}
-                isLoading={isLoading}
-                isFetching={isFetching}
-                isSuccess={isSuccess}
                 books={books}
                 perPage={perPage}
                 booksMeta={booksMeta}
                 getBook={getBook}
                 handleDeleteBook={handleDeleteBook}
                 setPerPage={setPerPage}
-                urlPage={urlPage}
                 setUrlPage={setUrlPage}
                 refreshTable={refreshTable}
                 searchBook={searchBook}

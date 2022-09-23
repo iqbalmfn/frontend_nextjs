@@ -5,8 +5,12 @@ import baseUrl from '@/lib/baseUrl'
 import { useFormik } from 'formik'
 import { bookSchema } from '@/components/Book/BookSchema'
 import swal from 'sweetalert'
+import { useMutation, useQuery, useQueryClient } from 'react-query'
+// import { useForm } from "react-hook-form"
 
 function useBook() {
+  const [body, setBody] = useState(null)
+  const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(10)
   const [urlPage, setUrlPage] = useState(`${baseUrl}/api/books?page=1`)
   const [searchBook, setSearchBook] = useState('')
@@ -20,45 +24,12 @@ function useBook() {
   const [categories, setCategories] = useState([])
   const [image, setImage] = useState(null)
   const [message, setMessage] = useState({
-    image: null
+    image: null,
   })
+  const [success, setSuccess] = useState(false)
 
+  const queryClient = useQueryClient();
 
-  async function getCategories() {
-    const response = await axios.get(`${baseUrl}/api/categories`)
-    setCategories(response.data.data)
-  }
-
-  // mangambil data books
-  async function fetchBook() {
-    try {
-      setLoading(true)
-      const response = await axios.get(urlPage, {
-        params: {
-          perPage: perPage,
-          search: searchBook,
-          category: categoryBook,
-        }
-      })
-      setBooks(response.data.data.data)
-      setBooksMeta(response.data.data)
-      setRefresh(false)
-    } catch (error) {
-      setError(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function refreshTable() {
-    setRefresh(true)
-    setUrlPage('http://localhost:8000/api/books?page=1')
-  }
-
-  useEffect(() => {
-    getCategories()
-    fetchBook()
-  }, [urlPage, perPage, searchBook, refresh, categoryBook])
   // handle form
   const formik = useFormik({
     initialValues: {
@@ -68,7 +39,7 @@ function useBook() {
       price: 0,
     },
     validationSchema: bookSchema,
-    onSubmit: async (values) => {
+    onSubmit: async values => {
       try {
         if (values.id) {
           handleUpdateBooks(values)
@@ -81,6 +52,100 @@ function useBook() {
     },
   })
 
+  // query string fetch
+  async function getBooks(urlPage, perPage, searchBook, categoryBook) {
+    try {
+      const response = await axios.get(urlPage, {
+        params: {
+          perPage: perPage,
+          search: searchBook,
+          category: categoryBook,
+        },
+      })
+      return response.data
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const { data, isError, isLoading, isFetching, isSuccess } = useQuery(
+    ['books', urlPage, perPage, searchBook, categoryBook],
+    () => getBooks(urlPage, perPage, searchBook, categoryBook),
+  )
+
+  const mutation = useMutation(stateSubmit, {
+    onMutate: async (newData) => {
+      await queryClient.invalidateQueries('books')
+      const previousData = queryClient.getQueriesData('books')
+      if (previousData) {
+        newData = {...newData}
+        const finalData = [...previousData, newData]
+        queryClient.setQueryData('books', finalData);
+      }
+
+      return {previousData}
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('books')
+    },
+    onError: async () => {
+      console.log('on error');
+    },
+    onSettled: async (data, error) => {
+      if (data) {
+        await queryClient.invalidateQueries('books')
+        // setSuccess(false)
+        console.log('settled');
+      } else {
+        console.log('error');
+      }
+    }
+  })
+  
+  async function onSubmit(data) {
+    console.log(data);
+    await mutation.mutate(data)
+  }
+
+  // const { formState: { errors }, register, handleSubmit, reset, clearErrors } = useForm()
+
+
+  async function getCategories() {
+    const response = await axios.get(`${baseUrl}/api/categories`)
+    setCategories(response.data.data)
+  }
+
+  // mangambil data books
+  // async function fetchBook() {
+  //   try {
+  //     setLoading(true)
+  //     const response = await axios.get(urlPage, {
+  //       params: {
+  //         perPage: perPage,
+  //         search: searchBook,
+  //         category: categoryBook,
+  //       },
+  //     })
+  //     setBooks(response.data.data.data)
+  //     setBooksMeta(response.data.data)
+  //     setRefresh(false)
+  //   } catch (error) {
+  //     setError(error.message)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+  function refreshTable() {
+    setRefresh(true)
+    setUrlPage('http://localhost:8000/api/books?page=1')
+  }
+
+  useEffect(() => {
+    getCategories()
+    // fetchBook()
+  }, [])
+
   // handle update
   async function handleUpdateBooks(values) {
     try {
@@ -90,12 +155,6 @@ function useBook() {
       )
       const book = response.data.data
       const updatedBook = books.map(item => (item.id === book.id ? book : item))
-      formik.resetForm();
-      setBooks(updatedBook)
-      stateSubmit(false)
-      toast.success('sukses bro', {
-        theme: 'colored',
-      })
     } catch (error) {
       toast.error('error bro', {
         theme: 'colored',
@@ -115,8 +174,11 @@ function useBook() {
       if (willDelete) {
         await axios.delete(`${baseUrl}/api/books/${id}`)
         const filteredBooks = books.filter(item => item.id !== id)
+        stateSubmit()
+        console.log(submit);
         setBooks(filteredBooks)
         formik.resetForm()
+        // stateSubmit()
       }
     })
   }
@@ -138,6 +200,11 @@ function useBook() {
     }
   }
 
+  function handleSuccess(value) {
+    setSuccess(value);
+    // return value
+  }
+
   async function handleAddBook(values) {
     try {
       const formData = new FormData()
@@ -156,15 +223,16 @@ function useBook() {
             .substr(2)}`,
         },
       })
-      const book = response.data.data
-      setBooks(prev => [book, ...prev])
-      formik.resetForm();
+      handleSuccess(true)
+      // const book = response.data.data
+      // setBooks(prev => [book, ...prev])
+      formik.resetForm()
       setImage(null)
       stateSubmit(false)
+      setMessage({ image: '' })
       toast.success('sukses bro', {
         theme: 'colored',
       })
-      setMessage({ image: '' })
     } catch (error) {
       toast.error(error.response.data.data.image[0], {
         theme: 'colored',
@@ -173,11 +241,19 @@ function useBook() {
     }
   }
 
+  // console.log(handleAddBook);
+
   function stateSubmit(value) {
     setSubmit(value)
   }
 
   return {
+    data,
+    page,
+    setPage,
+    isLoading,
+    isFetching,
+    isSuccess,
     categories,
     books,
     booksMeta,
@@ -199,7 +275,9 @@ function useBook() {
     message,
     refreshTable,
     categoryBook,
-    setCategoryBook
+    setCategoryBook,
+    onSubmit,
+    // handleSubmit, errors, register, reset, clearErrors
   }
 }
 

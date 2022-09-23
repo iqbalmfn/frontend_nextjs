@@ -8,10 +8,17 @@ import { ToastContainer } from 'react-toastify';
 export default function Book() {
   const {
     formik,
+    page,
+    setPage,
+    data,
+    isLoading,
+    isFetching,
+    isSuccess,
     books,
     booksMeta,
     searchBook,
     setSearchBook,
+    urlPage,
     setUrlPage,
     perPage,
     setPerPage,
@@ -25,7 +32,9 @@ export default function Book() {
     message,
     refreshTable,
     categoryBook,
-    setCategoryBook
+    setCategoryBook,
+    onSubmit,
+    // handleSubmit, errors, register, reset, clearErrors
   } = useBook()
 
   return (
@@ -49,15 +58,28 @@ export default function Book() {
               image={image}
               setImage={setImage}
               message={message}
+              onSubmit={onSubmit}
+              // handleSubmit={handleSubmit}
+              // errors={errors}
+              // register={register}
+              // reset={reset}
+              // clearErrors={clearErrors}
             />
             <div className="p-6 bg-white">
               <BookTable
+                page={page}
+                setPage={setPage}
+                data={data}
+                isLoading={isLoading}
+                isFetching={isFetching}
+                isSuccess={isSuccess}
                 books={books}
                 perPage={perPage}
                 booksMeta={booksMeta}
                 getBook={getBook}
                 handleDeleteBook={handleDeleteBook}
                 setPerPage={setPerPage}
+                urlPage={urlPage}
                 setUrlPage={setUrlPage}
                 refreshTable={refreshTable}
                 searchBook={searchBook}
@@ -65,6 +87,7 @@ export default function Book() {
                 bookLoading={bookLoading}
                 categoryBook={categoryBook}
                 setCategoryBook={setCategoryBook}
+                
               />
             </div>
           </div>
