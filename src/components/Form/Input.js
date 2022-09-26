@@ -12,21 +12,22 @@ function Label({ children }) {
   )
 }
 
-function Form({ className, ...props }) {
+function Form({ className, name, required, register, ...props }) {
   return (
     <div className="relative">
       <input
+        {...register(name)}
+        {...props}
         className={clsx(
           className,
           'w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm',
         )}
-        {...props}
       />
     </div>
   )
 }
 
-function Select({ className, children, ...props }) {
+const Select = React.forwardRef({ className, children, ...props }, ref) => {
   return (
     <select
       {...props}
